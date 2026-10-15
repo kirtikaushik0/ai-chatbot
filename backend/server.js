@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const Groq = require("groq-sdk");
-require("dotenv").config();
+require("dotenv").config({ path: __dirname + "/.env" });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
