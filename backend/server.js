@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const Groq = require("groq-sdk");
-require("dotenv").config({ path: __dirname + "/.env" });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,10 +11,6 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
 
 app.get("/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
@@ -28,6 +23,10 @@ app.post("/api/chat", async (req, res) => {
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "Messages array is required." });
     }
+
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
 
     const systemMessage = {
       role: "system",
@@ -53,6 +52,7 @@ app.post("/api/chat", async (req, res) => {
     });
   } catch (error) {
     console.error("Groq API error:", error);
+    console.error("API Key present:", !!process.env.GROQ_API_KEY);
     if (error.status === 401) return res.status(401).json({ error: "Invalid Groq API key." });
     if (error.status === 429) return res.status(429).json({ error: "Rate limit exceeded." });
     res.status(500).json({ error: "An unexpected error occurred." });
@@ -61,4 +61,5 @@ app.post("/api/chat", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`API Key loaded: ${!!process.env.GROQ_API_KEY}`);
 });
